@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pemberani Badminton Tournament</title>
+  
+  <link rel="icon" href="logo.png" type="image/png">
+  
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -38,6 +41,20 @@
       margin: 0 auto;
       position: relative;
       z-index: 2;
+    }
+
+    .header-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+    
+    .main-logo {
+      width: 140px; 
+      height: auto;
+      margin-bottom: 1rem;
+      filter: drop-shadow(0 4px 15px rgba(212, 175, 55, 0.4));
     }
 
     h1 {
@@ -362,7 +379,12 @@
 <body>
 
 <div class="app">
-  <h1>Pemberani Badminton Tournament</h1>
+  
+  <div class="header-container">
+    <img src="logo.png" alt="Pemberani Badminton Club" class="main-logo">
+    <h1>Pemberani Badminton Tournament</h1>
+  </div>
+  
   <div class="subhead">Play with Courage. Win with Pride.</div>
 
   <div class="tabs">
