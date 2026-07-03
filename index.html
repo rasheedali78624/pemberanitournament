@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pemberani Badminton Tournament</title>
   
+  <!-- Browser Tab Logo (Must be in the same folder as this HTML file) -->
   <link rel="icon" href="logo.png" type="image/png">
   
+  <!-- html2canvas for certificate PNG -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -112,25 +114,36 @@
     .btn-reset:hover { background: #ff4444; color: #000; }
     .btn-hard-reset { background: #ff4444; color: #000; border: none; padding: 0.8rem; width: 100%; border-radius: 4px; font-weight: bold; text-transform: uppercase; cursor: pointer; margin-top: 2rem; }
 
-    /* ----- BRACKET CHART (FIXED) ----- */
-    .bracket-wrapper { padding: 2rem 1rem; overflow-x: auto; background: #0d0d0d; border-radius: 8px; border: 1px solid #222;}
-    .bracket-container { display: flex; justify-content: center; gap: 4rem; min-width: 600px; }
-    .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 3rem; position: relative; width: 240px; }
+    /* ----- BRACKETS (League & Championship) ----- */
+    .bracket-wrapper { padding: 2rem; overflow-x: auto; background: #0d0d0d; border-radius: 8px; border: 1px solid #222; margin-bottom: 2rem;}
     
-    .bracket-node { background: #151515; border: 1px solid var(--gold-dark); padding: 1rem; border-radius: 6px; position: relative; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2; }
+    /* League Bracket specific */
+    .league-grid { display: flex; gap: 2rem; justify-content: center; flex-wrap: wrap; }
+    .league-box { flex: 1; min-width: 250px; background: #111; border: 1px solid var(--gold-dark); border-radius: 6px; padding: 1.5rem; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+    .league-box h3 { text-align: center; color: var(--gold-light); text-transform: uppercase; border-bottom: 1px solid #333; padding-bottom: 0.5rem; margin-bottom: 1rem; font-size: 1.1rem; }
+    .league-box ul { list-style: none; padding: 0; }
+    .league-box li { padding: 0.5rem 0; border-bottom: 1px dashed #222; text-align: center; font-weight: 600; font-size: 0.95rem; }
+    .league-box li:last-child { border-bottom: none; }
+    
+    /* Championship Bracket specific */
+    .bracket-container { display: flex; justify-content: center; gap: 3rem; min-width: 600px; }
+    .round-sf { display: flex; flex-direction: column; justify-content: center; gap: 3rem; position: relative; width: 220px; }
+    .round-final { display: flex; flex-direction: column; justify-content: flex-start; gap: 3rem; position: relative; width: 220px; padding-top: 1rem; }
+    
+    .bracket-node { background: #111; border: 1px solid var(--gold-dark); padding: 1rem; border-radius: 6px; position: relative; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 2; }
     .bracket-label { font-size: 0.75rem; color: var(--gold-light); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 0.5rem; border-bottom: 1px solid #333; padding-bottom: 0.3rem; font-weight: bold; }
     .bracket-team { padding: 0.4rem; font-weight: 600; font-size: 0.95rem; }
     .bracket-team.winner { color: var(--gold-primary); font-weight: 800; text-shadow: 0 0 5px rgba(212, 175, 55, 0.3); }
     .bracket-vs { font-size: 0.7rem; color: #666; margin: 0.2rem 0; font-weight: bold; }
 
-    /* Bracket connecting lines */
-    .node-sf::after { content: ''; position: absolute; right: -2rem; top: 50%; width: 2rem; height: 2px; background: var(--gold-dark); z-index: 1; }
-    .col-final { position: relative; }
-    .col-final::before { content: ''; position: absolute; left: -2rem; top: 20%; bottom: 20%; width: 2px; background: var(--gold-dark); z-index: 1; }
-    .node-final::before { content: ''; position: absolute; left: -2rem; top: 50%; width: 2rem; height: 2px; background: var(--gold-dark); z-index: 1; }
+    /* Proper Connector Lines */
+    .round-sf::after { content: ''; position: absolute; right: -1.5rem; top: 22%; bottom: 22%; width: 2px; background: var(--gold-dark); z-index: 1; }
+    .node-sf::after { content: ''; position: absolute; right: -1.5rem; top: 50%; width: 1.5rem; height: 2px; background: var(--gold-dark); z-index: 1; }
+    .node-final { margin-top: 3.2rem; } /* Pushes the final down perfectly between the two SFs */
+    .node-final::before { content: ''; position: absolute; left: -1.5rem; top: 50%; width: 1.5rem; height: 2px; background: var(--gold-dark); z-index: 1; }
     
     /* Bronze match isolated style */
-    .node-bronze { margin-top: 2rem; border-color: #CD7F32; }
+    .node-bronze { margin-top: 1rem; border-color: #CD7F32; }
     .node-bronze .bracket-label { color: #CD7F32; }
 
     /* ----- CERTIFICATES ----- */
@@ -146,11 +159,12 @@
     @media print {
       body { background: #fff; color: #000; padding: 0; }
       .tabs, .subhead, .btn { display: none !important; }
-      .card { box-shadow: none; border: 1px solid #ccc; background: #fff; }
-      .bracket-wrapper { background: #fff; border: none; }
+      .card { box-shadow: none; border: none; background: #fff; padding: 0; }
+      .bracket-wrapper { background: #fff; border: none; padding: 0; margin-bottom: 2rem; }
+      .league-box { background: #f9f9f9; border-color: #000; box-shadow: none; }
       .bracket-node { background: #fafafa; border-color: #000; box-shadow: none;}
-      .bracket-label { color: #000; border-bottom-color: #000;}
-      .node-sf::after, .col-final::before, .node-final::before { background: #000; }
+      .bracket-label, .league-box h3 { color: #000; border-bottom-color: #000;}
+      .round-sf::after, .node-sf::after, .node-final::before { background: #000; }
       .bracket-team.winner { color: #000; }
     }
   </style>
@@ -159,6 +173,7 @@
 
 <div class="app">
   
+  <!-- LOGO & HEADER -->
   <div class="header-container">
     <img src="logo.png" alt="Pemberani Badminton Club" class="main-logo">
     <h1>Pemberani Badminton Tournament</h1>
@@ -166,16 +181,19 @@
   
   <div class="subhead">Play with Courage. Win with Pride.</div>
 
+  <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" data-tab="tabCourts">Active Courts</button>
     <button class="tab-btn" data-tab="tabFixtures">Results & Fixtures</button>
     <button class="tab-btn" data-tab="tabStandings">Standings</button>
-    <button class="tab-btn" data-tab="tabKnockout">Bracket Chart</button>
+    <button class="tab-btn" data-tab="tabKnockout">Brackets</button>
     <button class="tab-btn" data-tab="tabCerts">Certificates</button>
   </div>
 
+  <!-- TAB: ACTIVE COURTS -->
   <div id="tabCourts" class="tab-content active">
     <div class="courts-grid">
+      <!-- Court 1 -->
       <div class="court-card" id="court1Box">
         <div class="court-header">Court 1</div>
         <select class="assign-select" id="court1Select">
@@ -200,6 +218,7 @@
         </div>
       </div>
 
+      <!-- Court 2 -->
       <div class="court-card" id="court2Box">
         <div class="court-header">Court 2</div>
         <select class="assign-select" id="court2Select">
@@ -226,6 +245,7 @@
     </div>
   </div>
 
+  <!-- TAB: FIXTURES -->
   <div id="tabFixtures" class="tab-content">
     <div class="card">
       <div class="card-title">Tournament Schedule & Results</div>
@@ -235,24 +255,39 @@
     </div>
   </div>
 
+  <!-- TAB: STANDINGS -->
   <div id="tabStandings" class="tab-content">
     <div class="card"><div class="card-title">Group A</div><div id="standingsA"></div></div>
     <div class="card"><div class="card-title">Group B</div><div id="standingsB"></div></div>
   </div>
 
+  <!-- TAB: BRACKETS (League & Championship) -->
   <div id="tabKnockout" class="tab-content">
+    
+    <!-- League Bracket Area -->
+    <div class="card">
+      <div class="card-title text-center">League Bracket (Group Phase)</div>
+      <div class="bracket-wrapper" id="leagueBracketContainer">
+        <!-- Rendered via JS -->
+      </div>
+    </div>
+
+    <!-- Championship Bracket Area -->
     <div class="card">
       <div class="card-title">
         Championship Bracket
-        <button class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="window.print()">🖨️ Print</button>
+        <button class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="window.print()">🖨️ Print Page</button>
       </div>
       <div class="bracket-wrapper">
         <div class="bracket-container" id="bracketContainer">
-          </div>
+          <!-- Rendered via JS -->
+        </div>
       </div>
     </div>
+
   </div>
 
+  <!-- TAB: CERTIFICATES -->
   <div id="tabCerts" class="tab-content">
     <div class="card">
       <div class="card-title">Official E-Certificates</div>
@@ -300,7 +335,7 @@
       }
     }
     
-    // Knockout Stage
+    // Knockout Stage (Pairs are strictly null / TBD initially)
     const koIds = ['sf1', 'sf2', 'third', 'final'];
     const koLabels = ['Semi-Final 1', 'Semi-Final 2', 'Bronze Match', 'Grand Final'];
     for (let i = 0; i < 4; i++) {
@@ -346,6 +381,7 @@
       const courtNum = index + 1;
       const selectEl = document.getElementById(`${courtId}Select`);
       
+      // Ensure we only list upcoming matches that actually have teams assigned
       const upcoming = matches.filter(m => (m.status === 'upcoming' || m.status === `court${courtNum}`) && m.pair1 && m.pair2);
       let optionsHtml = '<option value="">-- Assign a Match --</option>';
       
@@ -462,7 +498,7 @@
     renderAll();
   }
 
-  // Manual SF Assignment
+  // Manual SF Assignment triggered from Fixtures dropdown
   window.updateKoTeam = function(matchId, pos, val) {
     const m = getMatch(matchId);
     if(m) {
@@ -535,7 +571,7 @@
         let team1Display = getPair(m.pair1)?.name || 'TBD';
         let team2Display = getPair(m.pair2)?.name || 'TBD';
 
-        // Manual Selection for SFs
+        // Display manual assignment dropdowns for Semi-Finals when upcoming
         if(m.round === 'knockout' && (m.id === 'ko-sf1' || m.id === 'ko-sf2') && m.status === 'upcoming') {
           const buildSelect = (pos, currentVal) => {
             let sel = `<select class="manual-select" onchange="updateKoTeam('${m.id}', ${pos}, this.value)">`;
@@ -576,17 +612,36 @@
     container.innerHTML = html;
   }
 
-  function renderKnockout() {
-    const container = document.getElementById('bracketContainer');
+  function renderBrackets() {
+    // 1. League Bracket (Groups)
+    const leagueContainer = document.getElementById('leagueBracketContainer');
+    const groupA = PAIRS.filter(p => p.group === 'A');
+    const groupB = PAIRS.filter(p => p.group === 'B');
+    
+    let leagueHtml = `<div class="league-grid">`;
+    const renderLeagueBox = (title, teams) => {
+      let box = `<div class="league-box"><h3>${title}</h3><ul>`;
+      teams.forEach(t => box += `<li>${t.name}</li>`);
+      box += `</ul></div>`;
+      return box;
+    };
+    leagueHtml += renderLeagueBox('Group A Pool', groupA);
+    leagueHtml += renderLeagueBox('Group B Pool', groupB);
+    leagueHtml += `</div>`;
+    leagueContainer.innerHTML = leagueHtml;
+
+    // 2. Championship Bracket (Knockout Tree)
+    const champContainer = document.getElementById('bracketContainer');
     const sf1 = getMatch('ko-sf1');
     const sf2 = getMatch('ko-sf2');
     const finalMatch = getMatch('ko-final');
     const thirdMatch = getMatch('ko-third');
 
+    // Strict node renderer. If pair is null, strictly shows TBD.
     const renderNode = (m, extraClass = '') => {
       if (!m) return '';
-      const p1 = getPair(m.pair1);
-      const p2 = getPair(m.pair2);
+      const p1 = m.pair1 ? getPair(m.pair1) : null;
+      const p2 = m.pair2 ? getPair(m.pair2) : null;
       const w = m.winner;
       
       return `
@@ -599,12 +654,12 @@
       `;
     };
 
-    container.innerHTML = `
-      <div class="bracket-col">
+    champContainer.innerHTML = `
+      <div class="round-sf">
         ${renderNode(sf1, 'node-sf')}
         ${renderNode(sf2, 'node-sf')}
       </div>
-      <div class="bracket-col col-final">
+      <div class="round-final col-final">
         ${renderNode(finalMatch, 'node-final')}
         ${renderNode(thirdMatch, 'node-bronze')}
       </div>
@@ -689,7 +744,7 @@
   function renderAll() {
     renderStandings();
     renderFixtures();
-    renderKnockout();
+    renderBrackets();
     renderCertificates();
     setupCourts();
   }
