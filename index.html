@@ -5,8 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pemberani Badminton Tournament</title>
   
+  <!-- Browser Tab Logo -->
   <link rel="icon" href="logo.png" type="image/png">
   
+  <!-- html2canvas for certificate PNG -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     :root {
@@ -253,8 +255,8 @@
       font-size: 0.8rem;
     }
     .rank-1 { background: var(--gold-primary); color: #000; }
-    .rank-2 { background: #C0C0C0; color: #000; } /* Silver */
-    .rank-3 { background: #CD7F32; color: #000; } /* Bronze */
+    .rank-2 { background: #C0C0C0; color: #000; } 
+    .rank-3 { background: #CD7F32; color: #000; } 
 
     /* ----- FIXTURES ----- */
     .fixture-item {
@@ -279,75 +281,121 @@
     .fixture-status.completed { background: var(--gold-dark); color: #fff; }
     .fixture-status.court1 { border-left: 3px solid #4facfe; }
     .fixture-status.court2 { border-left: 3px solid #f5576c; }
+    
+    .btn-reset {
+      background: transparent;
+      border: 1px solid #ff4444;
+      color: #ff4444;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: bold;
+      cursor: pointer;
+      text-transform: uppercase;
+      margin-left: 10px;
+      transition: all 0.2s;
+    }
+    .btn-reset:hover {
+      background: #ff4444;
+      color: #000;
+    }
+    .btn-hard-reset {
+      background: #ff4444;
+      color: #000;
+      border: none;
+      padding: 0.8rem;
+      width: 100%;
+      border-radius: 4px;
+      font-weight: bold;
+      text-transform: uppercase;
+      cursor: pointer;
+      margin-top: 2rem;
+    }
 
     /* ----- BRACKET CHART ----- */
+    .bracket-wrapper {
+      padding: 2rem 0;
+      overflow-x: auto;
+    }
     .bracket-container {
       display: flex;
       justify-content: center;
-      align-items: center;
-      gap: 2rem;
-      padding: 1rem 0;
-      overflow-x: auto;
+      align-items: stretch;
+      gap: 3rem;
+      min-width: 600px; /* Ensure layout integrity on mobile */
     }
-    .bracket-col { display: flex; flex-direction: column; justify-content: space-around; gap: 2rem; }
+    .bracket-col { 
+      display: flex; 
+      flex-direction: column; 
+      justify-content: center; 
+      gap: 2.5rem; 
+      position: relative;
+    }
+    .col-final {
+      justify-content: flex-start;
+      padding-top: 3.5rem;
+    }
     .bracket-node {
-      background: #0d0d0d;
+      background: #111;
       border: 1px solid var(--gold-dark);
       padding: 1rem;
       border-radius: 6px;
-      min-width: 200px;
+      width: 220px;
       position: relative;
       text-align: center;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+      box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+      z-index: 2;
     }
     .bracket-label {
-      font-size: 0.7rem;
+      font-size: 0.75rem;
       color: var(--gold-light);
       text-transform: uppercase;
       letter-spacing: 1px;
       margin-bottom: 0.5rem;
       border-bottom: 1px solid #333;
       padding-bottom: 0.3rem;
+      font-weight: bold;
     }
     .bracket-team {
       padding: 0.4rem;
       font-weight: 600;
-      font-size: 0.9rem;
+      font-size: 0.95rem;
     }
     .bracket-team.winner { color: var(--gold-primary); font-weight: 800; }
-    .bracket-vs { font-size: 0.7rem; color: #666; margin: 0.2rem 0; }
+    .bracket-vs { font-size: 0.7rem; color: #666; margin: 0.2rem 0; font-weight: bold; }
 
     /* Connector lines */
-    .node-sf { position: relative; }
     .node-sf::after {
       content: '';
       position: absolute;
-      right: -2rem;
+      right: -1.5rem;
       top: 50%;
-      width: 2rem;
+      width: 1.5rem;
       height: 2px;
       background: var(--gold-dark);
+      z-index: 1;
     }
-    .col-final { position: relative; }
     .col-final::before {
       content: '';
       position: absolute;
-      left: -2rem;
-      top: 25%;
-      bottom: 25%;
+      left: -1.5rem;
+      top: 6rem; 
+      bottom: 12rem; 
       width: 2px;
       background: var(--gold-dark);
+      z-index: 1;
     }
-    .node-final { position: relative; }
     .node-final::before {
       content: '';
       position: absolute;
-      left: -2rem;
+      left: -1.5rem;
       top: 50%;
-      width: 2rem;
+      width: 1.5rem;
       height: 2px;
       background: var(--gold-dark);
+      z-index: 1;
     }
+    .node-third { margin-top: 3rem; }
 
     /* ----- CERTIFICATES ----- */
     .cert-grid {
@@ -371,8 +419,7 @@
     .text-gold { color: var(--gold-primary); }
 
     @media (max-width: 600px) {
-      .bracket-container { flex-direction: column; }
-      .node-sf::after, .col-final::before, .node-final::before { display: none; }
+      .bracket-container { justify-content: flex-start; }
     }
   </style>
 </head>
@@ -380,6 +427,7 @@
 
 <div class="app">
   
+  <!-- LOGO & HEADER -->
   <div class="header-container">
     <img src="logo.png" alt="Pemberani Badminton Club" class="main-logo">
     <h1>Pemberani Badminton Tournament</h1>
@@ -387,6 +435,7 @@
   
   <div class="subhead">Play with Courage. Win with Pride.</div>
 
+  <!-- Tabs -->
   <div class="tabs">
     <button class="tab-btn active" data-tab="tabCourts">Active Courts</button>
     <button class="tab-btn" data-tab="tabFixtures">Results & Fixtures</button>
@@ -395,8 +444,10 @@
     <button class="tab-btn" data-tab="tabCerts">Certificates</button>
   </div>
 
+  <!-- TAB: ACTIVE COURTS -->
   <div id="tabCourts" class="tab-content active">
     <div class="courts-grid">
+      <!-- Court 1 -->
       <div class="court-card" id="court1Box">
         <div class="court-header">Court 1</div>
         <select class="assign-select" id="court1Select">
@@ -421,6 +472,7 @@
         </div>
       </div>
 
+      <!-- Court 2 -->
       <div class="court-card" id="court2Box">
         <div class="court-header">Court 2</div>
         <select class="assign-select" id="court2Select">
@@ -447,26 +499,33 @@
     </div>
   </div>
 
+  <!-- TAB: FIXTURES -->
   <div id="tabFixtures" class="tab-content">
     <div class="card">
       <div class="card-title">Tournament Schedule & Results</div>
       <div id="fixtureList"></div>
+      
+      <button class="btn-hard-reset" onclick="hardResetData()">⚠ Clear All Tournament Data (Reset App)</button>
     </div>
   </div>
 
+  <!-- TAB: STANDINGS -->
   <div id="tabStandings" class="tab-content">
     <div class="card"><div class="card-title">Group A</div><div id="standingsA"></div></div>
     <div class="card"><div class="card-title">Group B</div><div id="standingsB"></div></div>
   </div>
 
+  <!-- TAB: KNOCKOUT BRACKET -->
   <div id="tabKnockout" class="tab-content">
-    <div class="card" style="overflow-x: auto;">
+    <div class="card">
       <div class="card-title text-center">Championship Bracket</div>
-      <div class="bracket-container" id="bracketContainer">
-        </div>
+      <div class="bracket-wrapper" id="bracketContainer">
+        <!-- Rendered via JS -->
+      </div>
     </div>
   </div>
 
+  <!-- TAB: CERTIFICATES -->
   <div id="tabCerts" class="tab-content">
     <div class="card">
       <div class="card-title">Official E-Certificates</div>
@@ -497,7 +556,7 @@
     const matches = [];
     const groups = { A: PAIRS.filter(p => p.group === 'A'), B: PAIRS.filter(p => p.group === 'B') };
     
-    // Group Stage
+    // Group Stage (10 games for A, 6 games for B = 16 total)
     for (const g of ['A', 'B']) {
       const arr = groups[g];
       for (let i = 0; i < arr.length; i++) {
@@ -511,13 +570,13 @@
             set1: null,
             set2: null,
             winner: null,
-            status: 'upcoming', // upcoming, court1, court2, completed
+            status: 'upcoming', 
           });
         }
       }
     }
     
-    // Knockout Stage
+    // Knockout Stage (4 games total)
     const koIds = ['sf1', 'sf2', 'third', 'final'];
     const koLabels = ['Semi-Final 1', 'Semi-Final 2', 'Bronze Match', 'Grand Final'];
     for (let i = 0; i < 4; i++) {
@@ -550,22 +609,31 @@
       }
     } catch(e) {}
   }
+  
   function saveState() {
     localStorage.setItem('pemberaniState', JSON.stringify({ matches }));
+  }
+
+  function hardResetData() {
+    if(confirm("Are you sure you want to clear ALL tournament data? This action cannot be undone.")) {
+      localStorage.removeItem('pemberaniState');
+      matches = buildMatches();
+      renderAll();
+      alert("Tournament Data Reset Successfully.");
+    }
   }
 
   function getPair(id) { return PAIRS.find(p => p.id === id); }
   function getMatch(id) { return matches.find(m => m.id === id); }
 
   // --------------------------------------------------------------
-  // COURTS LOGIC
+  // COURTS LOGIC & SCORE SUBMISSION
   // --------------------------------------------------------------
   function setupCourts() {
     ['court1', 'court2'].forEach((courtId, index) => {
       const courtNum = index + 1;
       const selectEl = document.getElementById(`${courtId}Select`);
       
-      // Populate select with upcoming matches
       const upcoming = matches.filter(m => m.status === 'upcoming' || m.status === `court${courtNum}`);
       let optionsHtml = '<option value="">-- Assign a Match --</option>';
       
@@ -579,10 +647,8 @@
       });
       selectEl.innerHTML = optionsHtml;
 
-      // Handle selection change
       selectEl.onchange = (e) => {
         const matchId = e.target.value;
-        // Reset old match if exists
         const oldMatch = matches.find(m => m.status === `court${courtNum}`);
         if(oldMatch && oldMatch.id !== matchId) { oldMatch.status = 'upcoming'; }
         
@@ -597,7 +663,6 @@
         renderAll();
       };
 
-      // Ensure view matches state on load
       const activeMatch = matches.find(m => m.status === `court${courtNum}`);
       if(activeMatch) { showCourtActive(courtNum, activeMatch); }
       else { document.getElementById(`${courtId}Active`).style.display = 'none'; }
@@ -612,7 +677,6 @@
     document.getElementById(`c${courtNum}p1Name`).innerText = p1.name;
     document.getElementById(`c${courtNum}p2Name`).innerText = p2.name;
     
-    // Clear inputs
     document.getElementById(`c${courtNum}s1p1`).value = m.set1 ? m.set1.p1 : '';
     document.getElementById(`c${courtNum}s2p1`).value = m.set2 ? m.set2.p1 : '';
     document.getElementById(`c${courtNum}s1p2`).value = m.set1 ? m.set1.p2 : '';
@@ -642,7 +706,7 @@
     match.winner = totalP1 > totalP2 ? match.pair1 : match.pair2;
     match.status = 'completed';
 
-    // Knockout progression logic
+    // Knockout progression routing
     if (match.round === 'knockout') {
       if (match.id === 'ko-sf1') {
         const finalM = getMatch('ko-final');
@@ -669,6 +733,38 @@
     if(match) match.status = 'upcoming';
     document.getElementById(`court${courtNum}Select`).value = "";
     document.getElementById(`court${courtNum}Active`).style.display = 'none';
+    saveState();
+    renderAll();
+  }
+
+  // --------------------------------------------------------------
+  // EDIT & RESET COMPLETED MATCHES
+  // --------------------------------------------------------------
+  function resetCompletedMatch(matchId) {
+    if(!confirm("Reset this match? The recorded scores will be deleted and it will be sent back to Upcoming.")) return;
+    
+    const m = getMatch(matchId);
+    if(!m) return;
+    
+    m.status = 'upcoming';
+    m.set1 = null;
+    m.set2 = null;
+    m.winner = null;
+    
+    // If resetting a knockout match, clear the downstream progressing teams
+    if (m.round === 'knockout') {
+      const finalM = getMatch('ko-final');
+      const thirdM = getMatch('ko-third');
+      if (m.id === 'ko-sf1') {
+        if (finalM) finalM.pair1 = null;
+        if (thirdM) thirdM.pair1 = null;
+      }
+      if (m.id === 'ko-sf2') {
+        if (finalM) finalM.pair2 = null;
+        if (thirdM) thirdM.pair2 = null;
+      }
+    }
+
     saveState();
     renderAll();
   }
@@ -756,6 +852,10 @@
       let setText = m.set1 ? `<br><span style="font-size:0.8rem; color:#888;">S1: ${m.set1.p1}-${m.set1.p2} | S2: ${m.set2.p1}-${m.set2.p2}</span>` : '';
       let winnerName = m.winner ? ` <span class="text-gold">(Winner: ${getPair(m.winner)?.name})</span>` : '';
       
+      const resetBtnHtml = m.status === 'completed' 
+        ? `<button class="btn-reset" onclick="resetCompletedMatch('${m.id}')">Reset</button>` 
+        : '';
+
       html += `
       <div class="fixture-item">
         <div style="flex: 1;">
@@ -766,7 +866,10 @@
           ${setText}
           ${winnerName}
         </div>
-        <div><span class="fixture-status ${m.status}">${statusText}</span></div>
+        <div style="display:flex; align-items:center;">
+          <span class="fixture-status ${m.status}">${statusText}</span>
+          ${resetBtnHtml}
+        </div>
       </div>`;
     });
     container.innerHTML = html;
@@ -779,14 +882,14 @@
     const finalMatch = getMatch('ko-final');
     const thirdMatch = getMatch('ko-third');
 
-    const renderNode = (m) => {
+    const renderNode = (m, extraClass = '') => {
       if (!m) return '';
       const p1 = getPair(m.pair1);
       const p2 = getPair(m.pair2);
       const w = m.winner;
       
       return `
-        <div class="bracket-node">
+        <div class="bracket-node ${extraClass}">
           <div class="bracket-label">${m.label}</div>
           <div class="bracket-team ${w === m.pair1 ? 'winner' : ''}">${p1 ? p1.name : 'TBD'}</div>
           <div class="bracket-vs">VS</div>
@@ -797,12 +900,12 @@
 
     container.innerHTML = `
       <div class="bracket-col">
-        <div class="node-sf">${renderNode(sf1)}</div>
-        <div class="node-sf">${renderNode(sf2)}</div>
+        ${renderNode(sf1, 'node-sf')}
+        ${renderNode(sf2, 'node-sf')}
       </div>
       <div class="bracket-col col-final">
-        <div class="node-final">${renderNode(finalMatch)}</div>
-        <div style="margin-top:2rem;">${renderNode(thirdMatch)}</div>
+        ${renderNode(finalMatch, 'node-final')}
+        ${renderNode(thirdMatch, 'node-third')}
       </div>
     `;
   }
@@ -849,7 +952,7 @@
     const preview = document.getElementById('certPreviewArea');
     preview.innerHTML = `
       <div id="certificateBox" style="background: linear-gradient(135deg, #151515, #0a0a0a); border: 2px solid var(--gold-dark); border-radius: 8px; padding: 3rem 2rem; text-align: center; max-width: 600px; margin: 2rem auto; position:relative; overflow:hidden;">
-        <div style="position:absolute; top:-50px; left:-50px; width:150px; height:150px; background:var(--gold-primary); opacity:0.1; border-radius:50%; blur(20px);"></div>
+        <div style="position:absolute; top:-50px; left:-50px; width:150px; height:150px; background:var(--gold-primary); opacity:0.1; border-radius:50%; filter: blur(20px);"></div>
         <h3 style="color: var(--gold-light); letter-spacing: 3px; text-transform: uppercase; font-size: 0.9rem; margin-bottom: 2rem;">Certificate of Achievement</h3>
         <h1 style="color: var(--gold-primary); margin-bottom: 0.5rem; font-size: 2.2rem;">${p.name}</h1>
         <div style="font-size: 1.2rem; color: #fff; margin-bottom: 2rem; text-transform: uppercase; letter-spacing: 1px;">${rank}</div>
