@@ -388,6 +388,15 @@
   }
 
   function submitCourtScore(courtNum) {
+    // 1. Password Protection Check
+    const pass = prompt(`Enter Admin Passcode to submit scores for Court ${courtNum}:`);
+    if (pass !== "0940") {
+      if (pass !== null) {
+        alert("Incorrect passcode. Score submission denied.");
+      }
+      return; // Stop execution if passcode is wrong or cancelled
+    }
+
     const match = matches.find(m => m.status === `court${courtNum}`);
     if(!match) return;
 
@@ -413,7 +422,9 @@
         const thirdM = getMatch('ko-third'); if (thirdM) thirdM.pair2 = match.winner === match.pair1 ? match.pair2 : match.pair1;
       }
     }
-    alert('Score saved!');
+    
+    // Save to Firebase and clear the display card
+    alert('Score successfully broadcasted to all devices!');
     document.getElementById(`court${courtNum}Active`).style.display = 'none';
     saveState();
   }
