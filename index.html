@@ -438,16 +438,42 @@
   }
 
   function resetCompletedMatch(matchId) {
-    if(!confirm("Reset this match? The scores will be cleared.")) return;
-    const m = getMatch(matchId); if(!m) return;
-    
-    m.status = 'upcoming'; m.set1 = null; m.set2 = null; m.winner = null;
-    if (m.round === 'knockout') {
-      const finalM = getMatch('ko-final'); const thirdM = getMatch('ko-third');
-      if (m.id === 'ko-sf1') { if (finalM) finalM.pair1 = null; if (thirdM) thirdM.pair1 = null; }
-      if (m.id === 'ko-sf2') { if (finalM) finalM.pair2 = null; if (thirdM) thirdM.pair2 = null; }
+    // 1. Passcode Check for resetting games
+    const pass = prompt("Enter Admin Passcode to reset this match's scores:");
+    if (pass !== "0940") {
+      if (pass !== null) {
+        alert("Incorrect passcode. Match reset denied.");
+      }
+      return; // Block execution if passcode is incorrect or canceled
     }
+
+    if (!confirm("Are you sure you want to reset this match? The recorded scores will be permanently cleared.")) return;
+    
+    const m = getMatch(matchId); 
+    if (!m) return;
+    
+    m.status = 'upcoming'; 
+    m.set1 = null; 
+    m.set2 = null; 
+    m.winner = null;
+    
+    // Automatically clear downstream progressions if it's a knockout match
+    if (m.round === 'knockout') {
+      const finalM = getMatch('ko-final'); 
+      const thirdM = getMatch('ko-third');
+      if (m.id === 'ko-sf1') { 
+        if (finalM) finalM.pair1 = null; 
+        if (thirdM) thirdM.pair1 = null; 
+      }
+      if (m.id === 'ko-sf2') { 
+        if (finalM) finalM.pair2 = null; 
+        if (thirdM) thirdM.pair2 = null; 
+      }
+    }
+    
+    // Sync the reset status across all devices via Firebase
     saveState();
+    alert("Match successfully reset to upcoming.");
   }
 
   window.updateKoTeam = function(matchId, pos, val) {
