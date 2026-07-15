@@ -5,11 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Pemberani Badminton Tournament</title>
   
-  <!-- Browser Tab Logo -->
   <link rel="icon" href="logo.png" type="image/png">
   
-  <!-- html2canvas for certificate PNG -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
   <style>
     :root {
       --gold-primary: #D4AF37;
@@ -139,8 +141,7 @@
     .champ-vs { font-size: 0.65rem; color: #666; margin: 2px 0; }
     
     /* Connecting Lines wrapper */
-    .champ-connector-col { width: 30px; position: relative; height: 260px; /* (110 box * 2) + 40 gap */ }
-    
+    .champ-connector-col { width: 30px; position: relative; height: 260px; }
     .champ-final-col { display: flex; flex-direction: column; }
     
     /* Bronze Match Specific */
@@ -181,7 +182,6 @@
     <button class="tab-btn" data-tab="tabCerts">Certificates</button>
   </div>
 
-  <!-- TAB: ACTIVE COURTS -->
   <div id="tabCourts" class="tab-content active">
     <div class="courts-grid">
       <div class="court-card" id="court1Box">
@@ -213,7 +213,6 @@
     </div>
   </div>
 
-  <!-- TAB: FIXTURES -->
   <div id="tabFixtures" class="tab-content">
     <div class="card">
       <div class="card-title">Tournament Schedule & Results</div>
@@ -222,38 +221,28 @@
     </div>
   </div>
 
-  <!-- TAB: STANDINGS -->
   <div id="tabStandings" class="tab-content">
     <div class="card"><div class="card-title">Group A</div><div id="standingsA"></div></div>
     <div class="card"><div class="card-title">Group B</div><div id="standingsB"></div></div>
   </div>
 
-  <!-- TAB: BRACKETS -->
   <div id="tabKnockout" class="tab-content">
-    
-    <!-- League Bracket (Cross-Tables) -->
     <div class="card">
       <div class="card-title">League Bracket (Group Phase)</div>
-      <div class="bracket-wrapper" id="leagueBracketContainer">
-        <!-- JS Matrix Rendered Here -->
-      </div>
+      <div class="bracket-wrapper" id="leagueBracketContainer"></div>
     </div>
 
-    <!-- Championship Bracket -->
     <div class="card">
       <div class="card-title">
         Championship Bracket
         <button class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="window.print()">🖨️ Print</button>
       </div>
       <div class="bracket-wrapper">
-        <div id="championshipBracketContainer">
-          <!-- JS Tree Rendered Here -->
-        </div>
+        <div id="championshipBracketContainer"></div>
       </div>
     </div>
   </div>
 
-  <!-- TAB: CERTIFICATES -->
   <div id="tabCerts" class="tab-content">
     <div class="card">
       <div class="card-title">Official E-Certificates</div>
@@ -281,7 +270,6 @@
     const matches = [];
     const groups = { A: PAIRS.filter(p => p.group === 'A'), B: PAIRS.filter(p => p.group === 'B') };
     
-    // Group Stage
     for (const g of ['A', 'B']) {
       const arr = groups[g];
       for (let i = 0; i < arr.length; i++) {
@@ -294,7 +282,6 @@
       }
     }
     
-    // Knockout Stage (Pairs are STRICTLY null / TBD initially)
     const koIds = ['sf1', 'sf2', 'third', 'final'];
     const koLabels = ['Semi-Final 1', 'Semi-Final 2', 'Bronze Match', 'Grand Final'];
     for (let i = 0; i < 4; i++) {
@@ -306,18 +293,49 @@
     return matches;
   }
 
-  // --- STATE ---
-  // Changed storage key to V3 to ensure old names cache is wiped clean!
+  // --- FIREBASE STATE SYNC ---
   let matches = buildMatches();
-  function loadState() { try { const saved = localStorage.getItem('pemberaniStateV3'); if (saved) { matches = JSON.parse(saved).matches; } } catch(e) {} }
-  function saveState() { localStorage.setItem('pemberaniStateV3', JSON.stringify({ matches })); }
+
+  // Integrated directly with your generated credentials!
+  const firebaseConfig = {
+    apiKey: "AIzaSya9NZSpbMVI0KuvfSMKxmDRiZA7ToKdk4U",
+    authDomain: "pemberani-badminton.firebaseapp.com",
+    databaseURL: "https://pemberani-badminton-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "pemberani-badminton",
+    storageBucket: "pemberani-badminton.firebasestorage.app",
+    messagingSenderId: "140352380730",
+    appId: "1:140352380730:web:da3333873dc4115ec13a03",
+    measurementId: "G-ZDC5EX8ZP8"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // Listen for Live Updates in Realtime
+  function loadState() {
+    const tournamentRef = db.ref('tournament/pemberaniStateV4');
+    tournamentRef.on('value', (snapshot) => {
+      const data = snapshot.val();
+      if (data && data.matches) {
+        matches = data.matches;
+        renderAll(); 
+      } else {
+        // Initialize the cloud database if it is empty
+        saveState();
+      }
+    });
+  }
+
+  // Save changes to the Cloud
+  function saveState() {
+    db.ref('tournament/pemberaniStateV4').set({ matches: matches });
+  }
 
   function hardResetData() {
     const pass = prompt("Enter 4-digit passcode to clear all tournament data:");
     if (pass === "0940") {
-      localStorage.removeItem('pemberaniStateV3');
       matches = buildMatches();
-      renderAll();
+      saveState();
       alert("Tournament Data Reset Successfully.");
     } else if (pass !== null) {
       alert("Incorrect passcode.");
@@ -351,7 +369,7 @@
         if(oldMatch && oldMatch.id !== matchId) { oldMatch.status = 'upcoming'; }
         if (matchId) { const m = getMatch(matchId); m.status = `court${courtNum}`; showCourtActive(courtNum, m); } 
         else { document.getElementById(`${courtId}Active`).style.display = 'none'; }
-        saveState(); renderAll();
+        saveState();
       };
       const activeMatch = matches.find(m => m.status === `court${courtNum}`);
       if(activeMatch) { showCourtActive(courtNum, activeMatch); } else { document.getElementById(`${courtId}Active`).style.display = 'none'; }
@@ -397,7 +415,7 @@
     }
     alert('Score saved!');
     document.getElementById(`court${courtNum}Active`).style.display = 'none';
-    saveState(); renderAll();
+    saveState();
   }
 
   function clearCourt(courtNum) {
@@ -405,7 +423,7 @@
     if(match) match.status = 'upcoming';
     document.getElementById(`court${courtNum}Select`).value = "";
     document.getElementById(`court${courtNum}Active`).style.display = 'none';
-    saveState(); renderAll();
+    saveState();
   }
 
   function resetCompletedMatch(matchId) {
@@ -418,12 +436,12 @@
       if (m.id === 'ko-sf1') { if (finalM) finalM.pair1 = null; if (thirdM) thirdM.pair1 = null; }
       if (m.id === 'ko-sf2') { if (finalM) finalM.pair2 = null; if (thirdM) thirdM.pair2 = null; }
     }
-    saveState(); renderAll();
+    saveState();
   }
 
   window.updateKoTeam = function(matchId, pos, val) {
     const m = getMatch(matchId);
-    if(m) { m['pair'+pos] = val ? parseInt(val) : null; saveState(); renderAll(); }
+    if(m) { m['pair'+pos] = val ? parseInt(val) : null; saveState(); }
   }
 
   // --- STANDINGS ---
@@ -499,7 +517,6 @@
   }
 
   function renderBrackets() {
-    // 1. LEAGUE BRACKET (Cross Tables Matrix)
     const leagueContainer = document.getElementById('leagueBracketContainer');
     let leagueHtml = '';
     
@@ -534,7 +551,6 @@
     });
     leagueContainer.innerHTML = leagueHtml;
 
-    // 2. CHAMPIONSHIP BRACKET (Exact Math CSS Layout)
     const champContainer = document.getElementById('championshipBracketContainer');
     const sf1 = getMatch('ko-sf1');
     const sf2 = getMatch('ko-sf2');
@@ -557,14 +573,11 @@
 
     champContainer.innerHTML = `
       <div class="champ-container">
-        <!-- Semi Finals Column -->
         <div class="champ-sf-col">
           ${renderNode(sf1)}
           ${renderNode(sf2)}
         </div>
         
-        <!-- Center Connecting Lines Column -->
-        <!-- Logic: Box=110px. Gap=40px. TopBox center=55px. BotBox center=55+110+40=205px. Diff=150px. -->
         <div class="champ-connector-col">
           <div style="position:absolute; top: 55px; left:0; width: 15px; border-top: 2px solid var(--gold-dark);"></div>
           <div style="position:absolute; top: 205px; left:0; width: 15px; border-top: 2px solid var(--gold-dark);"></div>
@@ -572,8 +585,6 @@
           <div style="position:absolute; top: 130px; left: 15px; width: 15px; border-top: 2px solid var(--gold-dark);"></div>
         </div>
         
-        <!-- Finals Column -->
-        <!-- Logic: Middle of vertical line is 130px. Final box height is 110px. Top margin = 130 - (110/2) = 75px -->
         <div class="champ-final-col">
           <div style="margin-top: 75px;">${renderNode(finalMatch)}</div>
           <div style="margin-top: 40px;">${renderNode(thirdMatch, 'bronze-match')}</div>
@@ -647,10 +658,9 @@
     setupCourts();
   }
 
+  // Auto-init and listen to Firebase
   loadState();
   document.querySelectorAll('.tab-btn').forEach(btn => { btn.addEventListener('click', () => switchTab(btn.dataset.tab)); });
-  renderAll();
-
 </script>
 </body>
 </html>
